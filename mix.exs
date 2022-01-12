@@ -14,8 +14,13 @@ defmodule ResuelveFCPayroll.MixProject do
         "coveralls.detail": :test,
         "coveralls.post": :test,
         "coveralls.html": :test
-      ]
+      ],
+      escript: escript()
     ]
+  end
+
+  def escript() do
+    [main_module: ResuelveFCPayroll]
   end
 
   # Run "mix help compile.app" to learn about applications.
@@ -29,6 +34,7 @@ defmodule ResuelveFCPayroll.MixProject do
   defp deps do
     [
       {:jason, "~> 1.3"},
+      {:decimal, "~> 2.0"},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:excoveralls, "~> 0.14", only: :test}
     ]

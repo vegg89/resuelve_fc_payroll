@@ -3,16 +3,31 @@ defmodule ResuelveFCPayroll do
   Documentation for `ResuelveFCPayroll`.
   """
 
-  @doc """
-  Hello world.
+  require Logger
 
-  ## Examples
+  def main(args \\ []) do
+    with {:ok, payroll_data} <- parse_args(args) do
+      calculate_total_payroll(payroll_data)
+    else
+      {:error, :no_arg} ->
+        Logger.error("No argument supplied.")
 
-      iex> ResuelveFCPayroll.hello()
-      :world
+      {:error, %Jason.DecodeError{}} ->
+        Logger.error("Unable to read JSON data.")
 
-  """
-  def hello do
-    :world
+      {:error, msg} ->
+        Logger.error("Unexpected error: #{inspect(msg)}.")
+    end
+  end
+
+  defp parse_args([]), do: {:error, :no_arg}
+
+  defp parse_args([arg]) do
+    Jason.decode(arg)
+  end
+
+  defp calculate_total_payroll(_payroll_data) do
+    # TODO: Implement
+    {:ok, true}
   end
 end
