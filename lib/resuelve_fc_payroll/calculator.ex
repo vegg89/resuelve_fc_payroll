@@ -19,12 +19,18 @@ defmodule ResuelveFCPayroll.Calculator do
         {total_acc + player.goals, minimum_acc + @minimum_goals[player.level]}
       end)
 
-    Decimal.div(team_goals, team_minimun)
+    reach = Decimal.div(team_goals, team_minimun)
+    if Decimal.compare(reach, 1) == :lt, do: reach, else: Decimal.new(1)
+  end
+
+  defp get_personal_reach(player) do
+    reach = Decimal.div(player.goals, @minimum_goals[player.level])
+    if Decimal.compare(reach, 1) == :lt, do: reach, else: Decimal.new(1)
   end
 
   defp calculate_players_payroll(players, team_reach) do
     Enum.map(players, fn player ->
-      personal_reach = Decimal.div(player.goals, @minimum_goals[player.level])
+      personal_reach = get_personal_reach(player)
 
       total_reach =
         personal_reach
