@@ -4,8 +4,13 @@ defmodule ResuelveFCPayrollTest do
   # doctest ResuelveFCPayroll
 
   describe "ResuelveFCPayroll.main/1" do
-    test "return payroll data" do
-      assert {:ok, true} == ResuelveFCPayroll.main(["{\"name\": \"Vincent\"}"])
+    setup :players
+
+    test "return payroll data", %{players: players} do
+      input = Jason.encode!(players)
+
+      assert "{\"players\":[{\"bonus\":10000,\"goals\":19,\"level\":\"Cuauh\",\"salary\":50000,\"total_salary\":\"59500.00\"}]}" ==
+               ResuelveFCPayroll.main([input])
     end
 
     test "return error if no arguments are supplied" do
@@ -17,5 +22,20 @@ defmodule ResuelveFCPayrollTest do
       {_result, log} = with_log(fn -> ResuelveFCPayroll.main(["malformed_json"]) end)
       assert log =~ "Unable to read JSON data."
     end
+  end
+
+  defp players(_context) do
+    players = %{
+      players: [
+        %{
+          goals: 19,
+          salary: 50000,
+          bonus: 10000,
+          level: "Cuauh"
+        }
+      ]
+    }
+
+    {:ok, players: players}
   end
 end

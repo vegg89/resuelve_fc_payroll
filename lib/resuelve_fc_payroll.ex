@@ -3,11 +3,18 @@ defmodule ResuelveFCPayroll do
   Documentation for `ResuelveFCPayroll`.
   """
 
+  alias ResuelveFCPayroll.Calculator
   require Logger
 
   def main(args \\ []) do
     with {:ok, payroll_data} <- parse_args(args) do
-      calculate_total_payroll(payroll_data)
+      result =
+        payroll_data
+        |> Calculator.calculate_payroll()
+        |> Jason.encode!()
+
+      Logger.info(result)
+      result
     else
       {:error, :no_arg} ->
         Logger.error("No argument supplied.")
@@ -23,11 +30,6 @@ defmodule ResuelveFCPayroll do
   defp parse_args([]), do: {:error, :no_arg}
 
   defp parse_args([arg]) do
-    Jason.decode(arg)
-  end
-
-  defp calculate_total_payroll(_payroll_data) do
-    # TODO: Implement
-    {:ok, true}
+    Jason.decode(arg, keys: :atoms)
   end
 end
