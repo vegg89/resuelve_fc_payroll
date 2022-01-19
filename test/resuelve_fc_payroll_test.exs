@@ -18,20 +18,25 @@ defmodule ResuelveFCPayrollTest do
       assert log =~ "No argument supplied."
     end
 
-    test "return error if --json argument can't be parsed" do
+    test "return error if json argument can't be parsed" do
       {_result, log} = with_log(fn -> ResuelveFCPayroll.main(["malformed_json"]) end)
       assert log =~ "Unable to read JSON data."
+    end
+
+    test "return error if json argument does not have the espected structure" do
+      {_result, log} = with_log(fn -> ResuelveFCPayroll.main(["{}"]) end)
+      assert log =~ "Bad JSON structure."
     end
   end
 
   defp players(_context) do
     players = %{
-      players: [
+      "players" => [
         %{
-          goals: 19,
-          salary: 50000,
-          bonus: 10000,
-          level: "Cuauh"
+          "goals" => 19,
+          "salary" => 50000,
+          "bonus" => 10000,
+          "level" => "Cuauh"
         }
       ]
     }
