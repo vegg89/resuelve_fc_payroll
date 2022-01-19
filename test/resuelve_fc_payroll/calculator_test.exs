@@ -41,9 +41,26 @@ defmodule ResuelveFCPayroll.CalculatorTest do
         |> elem(1)
         |> Map.get(:teams)
 
+      assert length(result_teams) == 2
+
       Enum.each(result_teams, fn %{players: players} ->
         player = Enum.find(players, &(&1["name"] == "Luis"))
         assert Decimal.eq?(player["total_salary"], Decimal.new(59550))
+      end)
+    end
+
+    test "calculate total salary for mutiple teams with custom rules", %{team: team} do
+      minimum_rules = %{"A" => 20, "B" => 20, "C" => 30, "Cuauh" => 50}
+
+      result_teams =
+        %{"teams" => [%{"players" => team, "minimum_goals" => minimum_rules}]}
+        |> Calculator.calculate_payroll()
+        |> elem(1)
+        |> Map.get(:teams)
+
+      Enum.each(result_teams, fn %{players: players} ->
+        player = Enum.find(players, &(&1["name"] == "Luis"))
+        assert Decimal.eq?(player["total_salary"], Decimal.new(53900))
       end)
     end
 

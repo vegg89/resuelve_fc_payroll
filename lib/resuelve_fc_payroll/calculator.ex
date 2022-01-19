@@ -13,25 +13,28 @@ defmodule ResuelveFCPayroll.Calculator do
     {:ok, %{teams: calculate_teams_payroll(teams)}}
   end
 
-  def calculate_payroll(%{"players" => players}) do
-    team_reach = get_team_reach(players)
-    {:ok, %{players: calculate_players_payroll(players, team_reach)}}
+  def calculate_payroll(team = %{"players" => players}) do
+    minimum_goals = team["minimum_goals"] || @minimum_goals
+    team_reach = get_team_reach(players, minimum_goals)
+    {:ok, %{players: calculate_players_payroll(players, minimum_goals, team_reach)}}
   end
 
   def calculate_payroll(_), do: {:error, :bad_structure}
 
-  defp get_team_reach(players) do
+  defp get_team_reach(players, minimum_goals) do
     {team_goals, team_minimun} =
       Enum.reduce(players, {0, 0}, fn player, {total_acc, minimum_acc} ->
-        {total_acc + player["goals"], minimum_acc + @minimum_goals[player["level"]]}
+        minimum = minimum_goals[player["level"]] || 5
+        {total_acc + player["goals"], minimum_acc + minimum}
       end)
 
     reach = Decimal.div(team_goals, team_minimun)
     if Decimal.compare(reach, 1) == :lt, do: reach, else: Decimal.new(1)
   end
 
-  defp get_personal_reach(player) do
-    reach = Decimal.div(player["goals"], @minimum_goals[player["level"]])
+  defp get_personal_reach(player, minimum_goals) do
+    minimum = minimum_goals[player["level"]] || 5
+    reach = Decimal.div(player["goals"], minimum)
     if Decimal.compare(reach, 1) == :lt, do: reach, else: Decimal.new(1)
   end
 
@@ -48,9 +51,9 @@ defmodule ResuelveFCPayroll.Calculator do
     end)
   end
 
-  defp calculate_players_payroll(players, team_reach) do
+  defp calculate_players_payroll(players, minimum_goals, team_reach) do
     Enum.map(players, fn player ->
-      personal_reach = get_personal_reach(player)
+      personal_reach = get_personal_reach(player, minimum_goals)
 
       total_reach =
         personal_reach
